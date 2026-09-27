@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ko" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>오늘, 한 줄</title>
+<meta name="theme-color" content="#FFF3E6">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF3E6; --pink:#FFD3E4; --mint:#CDF3E3; --yellow:#FFEAAE;
+    --card:#FFFDF9; --accent:#FF7FA6; --accent-d:#FF5C8D; --ink:#6B5142; --mist:#B49A87; --line:#F2D9C8;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; color:var(--ink); font-family:'Baloo 2','Gaegu',-apple-system,system-ui,sans-serif;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:calc(78px + env(safe-area-inset-bottom,0px));
+    min-height:100%; overflow-x:hidden; background:var(--bg);
+    background-image:
+      radial-gradient(circle at 8% 6%, var(--pink) 0%, transparent 32%),
+      radial-gradient(circle at 95% 14%, var(--mint) 0%, transparent 30%),
+      radial-gradient(circle at 85% 85%, var(--yellow) 0%, transparent 30%);
+  }
+  [data-lang="ko"]{ font-family:'Gaegu','Baloo 2',sans-serif; }
+  [data-lang="zh"]{ font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif; }
+  .wrap{max-width:520px; margin:0 auto; padding:26px 18px 30px; position:relative;}
+  .langbar{display:flex; gap:6px; justify-content:flex-end; margin-bottom:14px;}
+  .langbtn{border:none; background:#fff; border-radius:100px; padding:6px 10px; font-size:15px; cursor:pointer; box-shadow:0 3px 8px -3px rgba(107,81,66,.25); opacity:.55;}
+  .langbtn.active{opacity:1; box-shadow:0 4px 12px -3px rgba(255,92,141,.5); transform:scale(1.08);}
+  header{margin-bottom:20px; text-align:center;}
+  .mascot{font-size:44px; display:block; margin-bottom:4px;}
+  .date{font-size:13px; color:var(--mist); font-weight:700;}
+  h1{font-weight:800; font-size:25px; margin:8px 0 0; color:var(--accent-d); line-height:1.35;}
+  .streak-bar{display:flex; align-items:center; justify-content:center; gap:10px; margin-top:18px; padding:14px 18px; background:#fff; border-radius:100px; box-shadow:0 10px 24px -14px rgba(255,92,141,.5); border:2px dashed var(--pink);}
+  .flame{font-size:26px;}
+  .streak-txt{font-size:12px; color:var(--mist); font-weight:700;}
+  .streak-num{font-weight:800; font-size:26px; color:var(--accent-d);}
+  .card{margin-top:22px; background:var(--card); border-radius:26px; padding:22px; box-shadow:0 18px 40px -20px rgba(255,92,141,.4); border:3px solid #fff; outline:3px solid var(--pink); transform:rotate(-.5deg);}
+  textarea{width:100%; min-height:96px; border:none; background:transparent; font-family:inherit; font-weight:700; font-size:18px; line-height:1.7; color:var(--ink); resize:none; outline:none;}
+  textarea::placeholder{color:#D2B9A9;}
+  .row{display:flex; justify-content:space-between; align-items:center; margin-top:8px;}
+  .count{font-size:12px; color:var(--mist); font-weight:700;}
+  button{font-family:inherit; border:none; cursor:pointer; border-radius:100px; padding:12px 22px; font-size:14px; font-weight:800;}
+  .save{background:linear-gradient(135deg,var(--accent),var(--accent-d)); color:#fff; box-shadow:0 8px 16px -6px rgba(255,92,141,.6);}
+  .save:disabled{background:#EFDDD0; color:#fff; box-shadow:none; cursor:default;}
+  .save:not(:disabled):active{transform:scale(.94);}
+  .saved-tag{font-size:13px; color:var(--accent-d); font-weight:800; opacity:0; transition:opacity .3s;}
+  .saved-tag.show{opacity:1;}
+  .section-title{font-size:13px; color:var(--mist); font-weight:800; margin:32px 0 12px; display:flex; justify-content:space-between; align-items:center;}
+  .ghost{background:#fff; border:2px solid var(--pink); color:var(--accent-d); font-weight:800; padding:9px 16px; font-size:13px;}
+  .entries{display:flex; flex-direction:column; gap:10px;}
+  .entry{background:#fff; border:2px solid var(--line); border-radius:18px; padding:14px 16px;}
+  .entry .d{font-size:11px; color:var(--mist); font-weight:700; margin-bottom:5px;}
+  .entry .t{font-weight:700; font-size:15px; line-height:1.55;}
+  .empty{font-size:13px; color:var(--mist); font-weight:700; padding:22px 4px; text-align:center; border:2px dashed var(--pink); border-radius:18px; background:#fff;}
+  .install{margin-top:24px; padding:15px 16px; border-radius:18px; background:#fff; border:2px dashed var(--mint); font-size:13px; line-height:1.6; display:none; font-weight:700;}
+  .install.show{display:block;}
+  .install b{color:var(--accent-d);}
+  .random-view{margin-top:14px; padding:16px; border-radius:18px; background:#fff; border:2px solid var(--mint); display:none;}
+  .random-view.show{display:block;}
+  .random-view .d{font-size:11px; color:var(--mist); font-weight:700; margin-bottom:6px;}
+  .random-view .t{font-weight:700; font-size:16px; line-height:1.55;}
+  .celebrate{position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center; background:radial-gradient(circle at 50% 40%, rgba(255,211,228,.97), rgba(255,243,230,.98)); opacity:0; pointer-events:none; transition:opacity .25s ease;}
+  .celebrate.show{opacity:1; pointer-events:auto;}
+  .celebrate-inner{text-align:center; transform:scale(.6); opacity:0; transition:transform .45s cubic-bezier(.2,1.4,.4,1), opacity .3s;}
+  .celebrate.show .celebrate-inner{transform:scale(1); opacity:1;}
+  .celebrate-flame{font-size:66px; display:block; margin-bottom:6px;}
+  .celebrate-num{font-weight:800; font-size:70px; color:var(--accent-d); line-height:1;}
+  .celebrate-label{font-size:17px; color:var(--accent-d); margin-top:10px; font-weight:800;}
+
+  .page{display:none;}
+  .page.active{display:block;}
+  .navbar{position:fixed; left:0; right:0; bottom:0; display:flex; justify-content:center; padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px)); z-index:40;}
+  .navinner{display:flex; gap:6px; background:#fff; border-radius:100px; padding:6px; box-shadow:0 14px 30px -14px rgba(107,81,66,.4); border:2px solid var(--pink);}
+  .navbtn{background:transparent; color:var(--mist); font-weight:800; font-size:12px; padding:9px 16px; display:flex; flex-direction:column; align-items:center; gap:2px; border-radius:100px;}
+  .navbtn .ic{font-size:19px;}
+  .navbtn.active{background:linear-gradient(135deg,var(--accent),var(--accent-d)); color:#fff;}
+
+  .pagehead{text-align:center; margin-bottom:18px;}
+  .pagehead h2{font-weight:800; font-size:21px; color:var(--accent-d); margin:0;}
+  .pagehead p{font-size:12px; color:var(--mist); font-weight:700; margin:6px 0 0;}
+
+  .monthgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px;}
+  .mtile{position:relative; border-radius:40% 40% 46% 46% / 55% 55% 45% 45%; padding:14px 6px 12px; text-align:center; cursor:pointer; box-shadow:0 10px 18px -10px rgba(107,81,66,.35); border:3px solid #fff;}
+  .mtile::before,.mtile::after{content:""; position:absolute; top:-8px; width:22px; height:22px; border-radius:50%; background:inherit; border:3px solid #fff;}
+  .mtile::before{left:8px;} .mtile::after{right:8px;}
+  .mtile .mnum{font-size:11px; font-weight:800; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.15);}
+  .mtile .manimal{font-size:28px; margin:2px 0;}
+  .mtile .mbadge{font-size:10px; font-weight:800; color:#fff; background:rgba(0,0,0,.18); border-radius:100px; padding:2px 8px; display:inline-block;}
+
+  .daylist{display:flex; flex-direction:column; gap:8px;}
+  .dayrow{background:#fff; border:2px solid var(--line); border-radius:16px; padding:12px 14px; cursor:pointer;}
+  .dayrow.has .dnum{color:var(--accent-d);}
+  .dayrow .dtop{display:flex; justify-content:space-between; align-items:center;}
+  .dnum{font-weight:800; font-size:14px;}
+  .dprev{font-size:12px; color:var(--mist); font-weight:700; max-width:70%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .dfull{display:none; margin-top:8px; font-size:14px; font-weight:700; line-height:1.6; border-top:2px dashed var(--line); padding-top:8px;}
+  .dayrow.expanded .dfull{display:block;}
+  .backbtn{margin-bottom:14px;}
+
+  .lifeform{display:flex; flex-direction:column; gap:12px; background:#fff; border-radius:22px; padding:18px; border:3px solid var(--pink); margin-bottom:18px;}
+  .lifeform label{font-size:12px; font-weight:800; color:var(--mist);}
+  .lifeform input{width:100%; border:2px solid var(--line); border-radius:12px; padding:10px 12px; font-family:inherit; font-weight:700; font-size:15px; color:var(--ink); outline:none;}
+  .lifeform input:focus{border-color:var(--accent);}
+  .statcards{display:flex; flex-direction:column; gap:12px;}
+  .statcard{background:linear-gradient(135deg,#fff,#FFF8F1); border:2px solid var(--pink); border-radius:20px; padding:18px; text-align:center;}
+  .statcard .snum{font-weight:800; font-size:32px; color:var(--accent-d);}
+  .statcard .slabel{font-size:12px; font-weight:800; color:var(--mist); margin-top:4px;}
+  .cdhint{font-size:11px; color:var(--mist); font-weight:700; text-align:center; margin-top:14px; line-height:1.6;}
+</style>
+</head>
+<body data-lang="ko">
+<div class="wrap">
+  <div class="langbar">
+    <button class="langbtn active" data-lang="ko">🇰🇷</button>
+    <button class="langbtn" data-lang="en">🇺🇸</button>
+    <button class="langbtn" data-lang="zh">🇨🇳</button>
+    <button class="langbtn" data-lang="es">🇪🇸</button>
+  </div>
+
+  <div class="page active" id="page-today">
+    <header>
+      <span class="mascot">🐻</span>
+      <div class="date" id="todayLabel"></div>
+      <h1 id="titleText"></h1>
+      <div class="streak-bar">
+        <span class="flame">🔥</span>
+        <div><div class="streak-txt" id="streakLabel"></div><div class="streak-num" id="streakNum">0</div></div>
+      </div>
+    </header>
+    <div class="card">
+      <textarea id="entryInput" maxlength="300"></textarea>
+      <div class="row">
+        <span class="count"><span id="charCount">0</span>/300</span>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span class="saved-tag" id="savedTag"></span>
+          <button class="save" id="saveBtn" disabled></button>
+        </div>
+      </div>
+    </div>
+    <div class="install" id="installTip"></div>
+    <div class="section-title"><span id="pastLabel"></span><button class="ghost" id="randomBtn"></button></div>
+    <div class="random-view" id="randomView"></div>
+    <div class="entries" id="entriesList"></div>
+  </div>
+
+  <div class="page" id="page-calendar">
+    <div class="pagehead"><h2 id="calTitle"></h2><p id="calDesc"></p></div>
+    <div id="calGrid" class="monthgrid"></div>
+    <div id="calDay" style="display:none;">
+      <button class="ghost backbtn" id="calBackBtn"></button>
+      <div class="pagehead" style="margin-bottom:12px;"><h2 id="calDayTitle"></h2></div>
+      <div class="daylist" id="calDayList"></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-life">
+    <div class="pagehead"><h2 id="lifeTitle"></h2><p id="lifeDesc"></p></div>
+    <div class="lifeform">
+      <div><label id="lblBirth"></label><input type="number" id="inBirth" placeholder="1995"></div>
+      <div><label id="lblExp"></label><input type="number" id="inExp" placeholder="83"></div>
+      <div><label id="lblPBirth"></label><input type="number" id="inPBirth" placeholder="1965"></div>
+      <div><label id="lblMeet"></label><input type="number" id="inMeet" placeholder="4"></div>
+    </div>
+    <div class="statcards">
+      <div class="statcard"><div class="snum" id="stDays">-</div><div class="slabel" id="lblDays"></div></div>
+      <div class="statcard"><div class="snum" id="stSummers">-</div><div class="slabel" id="lblSummers"></div></div>
+      <div class="statcard"><div class="snum" id="stParent">-</div><div class="slabel" id="lblParent"></div></div>
+    </div>
+    <div class="cdhint" id="cdHint"></div>
+  </div>
+</div>
+
+<div class="navbar"><div class="navinner">
+  <button class="navbtn active" data-page="today"><span class="ic">✍️</span><span id="navToday"></span></button>
+  <button class="navbtn" data-page="calendar"><span class="ic">📅</span><span id="navCal"></span></button>
+  <button class="navbtn" data-page="life"><span class="ic">⏳</span><span id="navLife"></span></button>
+</div></div>
+
+<div class="celebrate" id="celebrate">
+  <div class="celebrate-inner"><span class="celebrate-flame">🔥</span><div class="celebrate-num" id="celebrateNum">1</div><div class="celebrate-label" id="celebrateLabel"></div></div>
+</div>
+
+<script>
+const STORE_KEY='oneliner_entries_v1', LANG_KEY='oneliner_lang', LIFE_KEY='oneliner_life_v1';
+const LOCALES={ko:'ko-KR',en:'en-US',zh:'zh-CN',es:'es-ES'};
+const MONTHS=[{e:'🐻',c:'#FFD98E'},{e:'🐰',c:'#FFC2D4'},{e:'🐥',c:'#FFB199'},{e:'🐶',c:'#BFD7FF'},{e:'🐱',c:'#BDEFC9'},{e:'🐨',c:'#BEE7F5'},{e:'🦆',c:'#FFE29A'},{e:'🐼',c:'#F6C6D0'},{e:'🐑',c:'#CFE8C9'},{e:'🦢',c:'#FFCFA0'},{e:'🐇',c:'#D9C9F0'},{e:'🦌',c:'#C9DDF0'}];
+
+const T={
+ ko:{title:'오늘 하루, 한 줄이면 돼요',streakLabel:'연속 기록',unit:'일',placeholder:'오늘 하루는 어땠나요?',save:'저장하기',edit:'수정하기',saved:'저장됨 ✓',past:'지난 기록',random:'🎲 랜덤으로 보기',empty:'아직 지난 기록이 없어요. 오늘 첫 줄을 남겨보세요.',install:'💡 <b>홈 화면에 추가</b>하면 앱처럼 아이콘 하나로 바로 열 수 있어요.',celebrate:'연속 기록!',randomEmpty:'아직 랜덤으로 볼 기록이 없어요.',
+   navToday:'오늘',navCal:'캘린더',navLife:'카운트다운',
+   calTitle:'나의 기록 캘린더',calDesc:'월을 눌러서 그날의 기록을 확인해보세요',calBack:'← 목록으로',dayEmpty:'기록 없음',
+   lifeTitle:'인생 카운트다운',lifeDesc:'남은 시간을 숫자로 가늠해보는 공간이에요',lblBirth:'내 출생연도',lblExp:'기대 수명 (세)',lblPBirth:'부모님 출생연도 (선택)',lblMeet:'1년에 부모님을 만나는 횟수',
+   lblDays:'앞으로 남은 날',lblSummers:'앞으로 맞이할 여름',lblParent:'부모님과 만날 수 있는 횟수',cdHint:'※ 정확한 예측이 아니라, 지금을 소중히 여기기 위한 참고용 숫자예요.'},
+ en:{title:'Just one line for today',streakLabel:'Streak',unit:' days',placeholder:'How was your day?',save:'Save',edit:'Update',saved:'Saved ✓',past:'Past entries',random:'🎲 Show random',empty:'No past entries yet.',install:'💡 <b>Add to Home Screen</b> to open it like an app.',celebrate:'day streak!',randomEmpty:'No entries yet.',
+   navToday:'Today',navCal:'Calendar',navLife:'Countdown',
+   calTitle:'My Memory Calendar',calDesc:'Tap a month to see what you wrote',calBack:'← Back',dayEmpty:'No entry',
+   lifeTitle:'Life Countdown',lifeDesc:'A gentle way to picture the time you have left',lblBirth:'Your birth year',lblExp:'Life expectancy (age)',lblPBirth:"Parent's birth year (optional)",lblMeet:'Visits with parents / year',
+   lblDays:'Days remaining',lblSummers:'Summers left',lblParent:'Visits left with parents',cdHint:"※ Just a rough number to help you value today — not a real prediction."},
+ zh:{title:'今天，写一句就好',streakLabel:'连续天数',unit:'天',placeholder:'今天过得怎么样？',save:'保存',edit:'修改',saved:'已保存 ✓',past:'过去的记录',random:'🎲 随机查看',empty:'还没有记录。',install:'💡 <b>添加到主屏幕</b>，像App一样打开。',celebrate:'连续记录！',randomEmpty:'还没有记录。',
+   navToday:'今天',navCal:'日历',navLife:'倒计时',
+   calTitle:'我的记录日历',calDesc:'点击月份查看当月记录',calBack:'← 返回',dayEmpty:'无记录',
+   lifeTitle:'人生倒计时',lifeDesc:'用数字温柔地想象剩下的时间',lblBirth:'出生年份',lblExp:'预期寿命（岁）',lblPBirth:'父母出生年份（可选）',lblMeet:'每年见父母的次数',
+   lblDays:'剩余天数',lblSummers:'剩余的夏天',lblParent:'与父母见面的剩余次数',cdHint:'※ 这不是精确预测，只是帮你珍惜当下的参考数字。'},
+ es:{title:'Solo una línea por hoy',streakLabel:'Racha',unit:' días',placeholder:'¿Cómo estuvo tu día?',save:'Guardar',edit:'Editar',saved:'Guardado ✓',past:'Registros anteriores',random:'🎲 Ver aleatorio',empty:'Aún no hay registros.',install:'💡 <b>Añade a la pantalla de inicio</b> para abrirlo como app.',celebrate:'¡días de racha!',randomEmpty:'Aún no hay registros.',
+   navToday:'Hoy',navCal:'Calendario',navLife:'Cuenta atrás',
+   calTitle:'Mi calendario de recuerdos',calDesc:'Toca un mes para ver lo que escribiste',calBack:'← Volver',dayEmpty:'Sin registro',
+   lifeTitle:'Cuenta atrás de la vida',lifeDesc:'Una forma suave de imaginar el tiempo que queda',lblBirth:'Año de nacimiento',lblExp:'Esperanza de vida (años)',lblPBirth:'Año de nacimiento de tus padres (opcional)',lblMeet:'Visitas a tus padres / año',
+   lblDays:'Días restantes',lblSummers:'Veranos restantes',lblParent:'Visitas restantes con tus padres',cdHint:'※ No es una predicción real, solo un número para valorar el presente.'}
+};
+
+let lang=localStorage.getItem(LANG_KEY)||'ko';
+const todayStr=()=>new Date().toISOString().slice(0,10);
+const fmt=(s)=>{const d=new Date(s+'T00:00:00');return d.toLocaleDateString(LOCALES[lang],{year:'numeric',month:'long',day:'numeric',weekday:'short'});};
+function load(){try{return JSON.parse(localStorage.getItem(STORE_KEY)||'{}');}catch(e){return {};}}
+function save(data){try{localStorage.setItem(STORE_KEY,JSON.stringify(data));return true;}catch(e){return false;}}
+let entries=load();
+function computeStreak(){let count=0,d=new Date();if(!entries[todayStr()])d.setDate(d.getDate()-1);while(true){const k=d.toISOString().slice(0,10);if(entries[k]){count++;d.setDate(d.getDate()-1);}else break;}return count;}
+function escapeHtml(str){const d=document.createElement('div');d.textContent=str;return d.innerHTML;}
+function renderStreak(){document.getElementById('streakNum').textContent=computeStreak()+T[lang].unit;}
+function renderEntries(){
+  const list=document.getElementById('entriesList');
+  const keys=Object.keys(entries).sort().reverse().filter(k=>k!==todayStr());
+  if(keys.length===0){list.innerHTML=`<div class="empty">${T[lang].empty}</div>`;return;}
+  list.innerHTML=keys.slice(0,30).map(k=>`<div class="entry"><div class="d">${fmt(k)}</div><div class="t">${escapeHtml(entries[k])}</div></div>`).join('');
+}
+
+function renderCalendarGrid(){
+  const year=new Date().getFullYear();
+  const grid=document.getElementById('calGrid');
+  grid.innerHTML=MONTHS.map((m,i)=>{
+    const mm=String(i+1).padStart(2,'0');
+    const cnt=Object.keys(entries).filter(k=>k.startsWith(`${year}-${mm}`)).length;
+    return `<div class="mtile" style="background:${m.c}" data-month="${i}"><div class="mnum">${i+1}</div><div class="manimal">${m.e}</div>${cnt>0?`<div class="mbadge">${cnt}</div>`:''}</div>`;
+  }).join('');
+}
+function openMonth(mIndex){
+  const year=new Date().getFullYear();
+  document.getElementById('calGrid').style.display='none';
+  document.getElementById('calDay').style.display='block';
+  const mName=new Date(year,mIndex,1).toLocaleDateString(LOCALES[lang],{month:'long'});
+  document.getElementById('calDayTitle').textContent=`${MONTHS[mIndex].e} ${mName}`;
+  const daysInMonth=new Date(year,mIndex+1,0).getDate();
+  const list=document.getElementById('calDayList');
+  let html='';
+  for(let d=1; d<=daysInMonth; d++){
+    const key=`${year}-${String(mIndex+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const has=!!entries[key];
+    const dow=new Date(year,mIndex,d).toLocaleDateString(LOCALES[lang],{weekday:'short'});
+    html+=`<div class="dayrow ${has?'has':''}" data-key="${key}"><div class="dtop"><span class="dnum">${d} (${dow})</span><span class="dprev">${has?escapeHtml(entries[key]).slice(0,16):T[lang].dayEmpty}</span></div>${has?`<div class="dfull">${escapeHtml(entries[key])}</div>`:''}</div>`;
+  }
+  list.innerHTML=html;
+}
+document.getElementById('calGrid').addEventListener('click',(e)=>{
+  const tile=e.target.closest('.mtile'); if(!tile) return;
+  openMonth(parseInt(tile.dataset.month));
+});
+document.getElementById('calDayList').addEventListener('click',(e)=>{
+  const row=e.target.closest('.dayrow'); if(!row || !row.classList.contains('has')) return;
+  row.classList.toggle('expanded');
+});
+document.getElementById('calBackBtn').addEventListener('click',()=>{
+  document.getElementById('calDay').style.display='none';
+  document.getElementById('calGrid').style.display='grid';
+});
+
+function loadLife(){try{return JSON.parse(localStorage.getItem(LIFE_KEY)||'{}');}catch(e){return {};}}
+function saveLife(v){try{localStorage.setItem(LIFE_KEY,JSON.stringify(v));}catch(e){}}
+function computeLife(){
+  const v={birth:+document.getElementById('inBirth').value||0, exp:+document.getElementById('inExp').value||0, pbirth:+document.getElementById('inPBirth').value||0, meet:+document.getElementById('inMeet').value||0};
+  saveLife(v);
+  const year=new Date().getFullYear();
+  const stDays=document.getElementById('stDays'), stSummers=document.getElementById('stSummers'), stParent=document.getElementById('stParent');
+  if(v.birth>1900 && v.exp>0){
+    const yearsLeft=Math.max(0,(v.birth+v.exp)-year);
+    stDays.textContent=(yearsLeft*365).toLocaleString(LOCALES[lang]);
+    stSummers.textContent=yearsLeft.toLocaleString(LOCALES[lang]);
+  } else { stDays.textContent='-'; stSummers.textContent='-'; }
+  if(v.pbirth>1900 && v.meet>0){
+    const pYearsLeft=Math.max(0,(v.pbirth+85)-year);
+    stParent.textContent=(pYearsLeft*v.meet).toLocaleString(LOCALES[lang]);
+  } else { stParent.textContent='-'; }
+}
+['inBirth','inExp','inPBirth','inMeet'].forEach(id=>document.getElementById(id).addEventListener('input',computeLife));
+
+function celebrateStreak(n){const o=document.getElementById('celebrate');document.getElementById('celebrateNum').textContent=n;o.classList.add('show');setTimeout(()=>o.classList.remove('show'),1400);}
+
+function applyLang(){
+  document.getElementById('htmlRoot').lang=lang; document.body.dataset.lang=lang;
+  const t=T[lang];
+  document.getElementById('titleText').textContent=t.title;
+  document.getElementById('streakLabel').textContent=t.streakLabel;
+  document.getElementById('entryInput').placeholder=t.placeholder;
+  document.getElementById('savedTag').textContent=t.saved;
+  document.getElementById('pastLabel').textContent=t.past;
+  document.getElementById('randomBtn').textContent=t.random;
+  document.getElementById('installTip').innerHTML=t.install;
+  document.getElementById('celebrateLabel').textContent=t.celebrate;
+  document.getElementById('saveBtn').textContent=entries[todayStr()]?t.edit:t.save;
+  document.getElementById('navToday').textContent=t.navToday;
+  document.getElementById('navCal').textContent=t.navCal;
+  document.getElementById('navLife').textContent=t.navLife;
+  document.getElementById('calTitle').textContent=t.calTitle;
+  document.getElementById('calDesc').textContent=t.calDesc;
+  document.getElementById('calBackBtn').textContent=t.calBack;
+  document.getElementById('lifeTitle').textContent=t.lifeTitle;
+  document.getElementById('lifeDesc').textContent=t.lifeDesc;
+  document.getElementById('lblBirth').textContent=t.lblBirth;
+  document.getElementById('lblExp').textContent=t.lblExp;
+  document.getElementById('lblPBirth').textContent=t.lblPBirth;
+  document.getElementById('lblMeet').textContent=t.lblMeet;
+  document.getElementById('lblDays').textContent=t.lblDays;
+  document.getElementById('lblSummers').textContent=t.lblSummers;
+  document.getElementById('lblParent').textContent=t.lblParent;
+  document.getElementById('cdHint').textContent=t.cdHint;
+  document.querySelectorAll('.langbtn').forEach(b=>b.classList.toggle('active',b.dataset.lang===lang));
+  document.getElementById('todayLabel').textContent=fmt(todayStr());
+  renderStreak(); renderEntries(); renderCalendarGrid();
+  document.getElementById('calDay').style.display='none';
+  document.getElementById('calGrid').style.display='grid';
+}
+
+function init(){
+  const input=document.getElementById('entryInput'), saveBtn=document.getElementById('saveBtn'), charCount=document.getElementById('charCount'), savedTag=document.getElementById('savedTag');
+  if(entries[todayStr()]) input.value=entries[todayStr()];
+  charCount.textContent=input.value.length; saveBtn.disabled=input.value.trim().length===0;
+  input.addEventListener('input',()=>{charCount.textContent=input.value.length; saveBtn.disabled=input.value.trim().length===0; savedTag.classList.remove('show');});
+  saveBtn.addEventListener('click',()=>{
+    const val=input.value.trim(); if(!val) return;
+    const wasNewDay=!entries[todayStr()];
+    entries[todayStr()]=val; const ok=save(entries);
+    savedTag.classList.toggle('show',ok); saveBtn.textContent=T[lang].edit;
+    renderStreak(); renderEntries(); renderCalendarGrid();
+    if(ok && wasNewDay) celebrateStreak(computeStreak());
+  });
+  document.getElementById('randomBtn').addEventListener('click',()=>{
+    const keys=Object.keys(entries); const view=document.getElementById('randomView');
+    if(keys.length===0){view.classList.add('show'); view.innerHTML=`<div class="t">${T[lang].randomEmpty}</div>`; return;}
+    const k=keys[Math.floor(Math.random()*keys.length)];
+    view.classList.add('show'); view.innerHTML=`<div class="d">${fmt(k)}</div><div class="t">${escapeHtml(entries[k])}</div>`;
+  });
+  document.querySelectorAll('.langbtn').forEach(btn=>btn.addEventListener('click',()=>{lang=btn.dataset.lang; localStorage.setItem(LANG_KEY,lang); applyLang();}));
+  document.querySelectorAll('.navbtn').forEach(btn=>btn.addEventListener('click',()=>{
+    document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-'+btn.dataset.page).classList.add('active');
+  }));
+  const lv=loadLife();
+  if(lv.birth) document.getElementById('inBirth').value=lv.birth;
+  if(lv.exp) document.getElementById('inExp').value=lv.exp;
+  if(lv.pbirth) document.getElementById('inPBirth').value=lv.pbirth;
+  if(lv.meet) document.getElementById('inMeet').value=lv.meet;
+  computeLife();
+  applyLang();
+  const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;
+  if(!isStandalone) document.getElementById('installTip').classList.add('show');
+}
+init();
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});}
+</script>
+</body>
+</html>
