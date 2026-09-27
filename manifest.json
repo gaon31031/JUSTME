@@ -1,0 +1,12 @@
+{
+  "name": "오늘, 한 줄",
+  "short_name": "한 줄",
+  "description": "매일 한 줄로 남기는 나의 하루 기록",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#14162B",
+  "theme_color": "#14162B",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
