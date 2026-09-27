@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>오늘, 한 줄</title>
+<meta name="theme-color" content="#FFF3E6">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFF3E6; --pink:#FFD3E4; --mint:#CDF3E3; --yellow:#FFEAAE;
+    --card:#FFFDF9; --accent:#FF7FA6; --accent-d:#FF5C8D; --ink:#6B5142; --mist:#B49A87; --line:#F2D9C8;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; color:var(--ink);
+    font-family:'Baloo 2','Gaegu',-apple-system,system-ui,sans-serif;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+    min-height:100%; overflow-x:hidden; background:var(--bg);
+    background-image:
+      radial-gradient(circle at 8% 6%, var(--pink) 0%, transparent 32%),
+      radial-gradient(circle at 95% 14%, var(--mint) 0%, transparent 30%),
+      radial-gradient(circle at 85% 85%, var(--yellow) 0%, transparent 30%);
+  }
+  [data-lang="ko"]{ font-family:'Gaegu','Baloo 2',sans-serif; }
+  [data-lang="zh"]{ font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif; }
+
+  .wrap{max-width:520px; margin:0 auto; padding:26px 18px 60px; position:relative;}
+  .langbar{display:flex; gap:6px; justify-content:flex-end; margin-bottom:14px;}
+  .langbtn{
+    border:none; background:#fff; border-radius:100px; padding:6px 10px; font-size:15px;
+    cursor:pointer; box-shadow:0 3px 8px -3px rgba(107,81,66,.25); opacity:.55;
+  }
+  .langbtn.active{opacity:1; box-shadow:0 4px 12px -3px rgba(255,92,141,.5); transform:scale(1.08);}
+
+  header{margin-bottom:20px; text-align:center;}
+  .mascot{font-size:44px; display:block; margin-bottom:4px;}
+  .date{font-size:13px; color:var(--mist); font-weight:700;}
+  h1{font-weight:800; font-size:25px; margin:8px 0 0; color:var(--accent-d); line-height:1.35;}
+
+  .streak-bar{
+    display:flex; align-items:center; justify-content:center; gap:10px; margin-top:18px; padding:14px 18px;
+    background:#fff; border-radius:100px; box-shadow:0 10px 24px -14px rgba(255,92,141,.5);
+    border:2px dashed var(--pink);
+  }
+  .flame{font-size:26px;}
+  .streak-txt{font-size:12px; color:var(--mist); font-weight:700;}
+  .streak-num{font-weight:800; font-size:26px; color:var(--accent-d);}
+
+  .card{
+    margin-top:22px; background:var(--card); color:var(--ink); border-radius:26px;
+    padding:22px; box-shadow:0 18px 40px -20px rgba(255,92,141,.4);
+    border:3px solid #fff; outline:3px solid var(--pink); position:relative; transform:rotate(-.5deg);
+  }
+  textarea{
+    width:100%; min-height:96px; border:none; background:transparent;
+    font-family:inherit; font-weight:700; font-size:18px; line-height:1.7; color:var(--ink);
+    resize:none; outline:none;
+  }
+  textarea::placeholder{color:#D2B9A9;}
+  .row{display:flex; justify-content:space-between; align-items:center; margin-top:8px;}
+  .count{font-size:12px; color:var(--mist); font-weight:700;}
+  button{font-family:inherit; border:none; cursor:pointer; border-radius:100px; padding:12px 22px; font-size:14px; font-weight:800;}
+  .save{background:linear-gradient(135deg,var(--accent),var(--accent-d)); color:#fff; box-shadow:0 8px 16px -6px rgba(255,92,141,.6);}
+  .save:disabled{background:#EFDDD0; color:#fff; box-shadow:none; cursor:default;}
+  .save:not(:disabled):active{transform:scale(.94);}
+  .saved-tag{font-size:13px; color:var(--accent-d); font-weight:800; opacity:0; transition:opacity .3s;}
+  .saved-tag.show{opacity:1;}
+
+  .section-title{font-size:13px; color:var(--mist); font-weight:800; margin:32px 0 12px; display:flex; justify-content:space-between; align-items:center;}
+  .ghost{background:#fff; border:2px solid var(--pink); color:var(--accent-d); font-weight:800; padding:9px 16px; font-size:13px;}
+  .entries{display:flex; flex-direction:column; gap:10px;}
+  .entry{background:#fff; border:2px solid var(--line); border-radius:18px; padding:14px 16px;}
+  .entry .d{font-size:11px; color:var(--mist); font-weight:700; margin-bottom:5px;}
+  .entry .t{font-weight:700; font-size:15px; line-height:1.55; color:var(--ink);}
+  .empty{font-size:13px; color:var(--mist); font-weight:700; padding:22px 4px; text-align:center; border:2px dashed var(--pink); border-radius:18px; background:#fff;}
+
+  .install{margin-top:24px; padding:15px 16px; border-radius:18px; background:#fff; border:2px dashed var(--mint); font-size:13px; color:var(--ink); line-height:1.6; display:none; font-weight:700;}
+  .install.show{display:block;}
+  .install b{color:var(--accent-d);}
+
+  .random-view{margin-top:14px; padding:16px; border-radius:18px; background:#fff; border:2px solid var(--mint); display:none;}
+  .random-view.show{display:block;}
+  .random-view .d{font-size:11px; color:var(--mist); font-weight:700; margin-bottom:6px;}
+  .random-view .t{font-weight:700; font-size:16px; color:var(--ink); line-height:1.55;}
+
+  .celebrate{
+    position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 50% 40%, rgba(255,211,228,.97), rgba(255,243,230,.98));
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .celebrate.show{opacity:1; pointer-events:auto;}
+  .celebrate-inner{text-align:center; transform:scale(.6); opacity:0; transition:transform .45s cubic-bezier(.2,1.4,.4,1), opacity .3s;}
+  .celebrate.show .celebrate-inner{transform:scale(1); opacity:1;}
+  .celebrate-flame{font-size:66px; display:block; margin-bottom:6px;}
+  .celebrate-num{font-weight:800; font-size:70px; color:var(--accent-d); line-height:1;}
+  .celebrate-label{font-size:17px; color:var(--accent-d); margin-top:10px; font-weight:800;}
+</style>
+</head>
+<body data-lang="ko">
+<div class="wrap">
+  <div class="langbar">
+    <button class="langbtn active" data-lang="ko">🇰🇷</button>
+    <button class="langbtn" data-lang="en">🇺🇸</button>
+    <button class="langbtn" data-lang="zh">🇨🇳</button>
+    <button class="langbtn" data-lang="es">🇪🇸</button>
+  </div>
+  <header>
+    <span class="mascot">🐻</span>
+    <div class="date" id="todayLabel"></div>
+    <h1 id="titleText"></h1>
+    <div class="streak-bar">
+      <span class="flame">🔥</span>
+      <div>
+        <div class="streak-txt" id="streakLabel"></div>
+        <div class="streak-num" id="streakNum">0</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="card">
+    <textarea id="entryInput" maxlength="300"></textarea>
+    <div class="row">
+      <span class="count"><span id="charCount">0</span>/300</span>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span class="saved-tag" id="savedTag"></span>
+        <button class="save" id="saveBtn" disabled></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="install" id="installTip"></div>
+
+  <div class="section-title">
+    <span id="pastLabel"></span>
+    <button class="ghost" id="randomBtn"></button>
+  </div>
+  <div class="random-view" id="randomView"></div>
+  <div class="entries" id="entriesList"></div>
+</div>
+
+<div class="celebrate" id="celebrate">
+  <div class="celebrate-inner">
+    <span class="celebrate-flame">🔥</span>
+    <div class="celebrate-num" id="celebrateNum">1</div>
+    <div class="celebrate-label" id="celebrateLabel"></div>
+  </div>
+</div>
+
+<script>
+const STORE_KEY = 'oneliner_entries_v1';
+const LANG_KEY = 'oneliner_lang';
+const LOCALES = {ko:'ko-KR', en:'en-US', zh:'zh-CN', es:'es-ES'};
+
+const T = {
+  ko:{title:'오늘 하루, 한 줄이면 돼요', streakLabel:'연속 기록', unit:'일', placeholder:'오늘 하루는 어땠나요?',
+      save:'저장하기', edit:'수정하기', saved:'저장됨 ✓', past:'지난 기록', random:'🎲 랜덤으로 보기',
+      empty:'아직 지난 기록이 없어요. 오늘 첫 줄을 남겨보세요.', install:'💡 <b>홈 화면에 추가</b>하면 앱처럼 아이콘 하나로 바로 열 수 있어요. 브라우저 메뉴에서 "홈 화면에 추가"를 눌러보세요.',
+      celebrate:'연속 기록!', randomEmpty:'아직 랜덤으로 볼 기록이 없어요.'},
+  en:{title:'Just one line for today', streakLabel:'Streak', unit:' days', placeholder:'How was your day?',
+      save:'Save', edit:'Update', saved:'Saved ✓', past:'Past entries', random:'🎲 Show random',
+      empty:'No past entries yet. Write your first line today.', install:'💡 <b>Add to Home Screen</b> to open it like an app with one tap. Try "Add to Home Screen" in your browser menu.',
+      celebrate:'day streak!', randomEmpty:'No entries to show yet.'},
+  zh:{title:'今天，写一句就好', streakLabel:'连续天数', unit:'天', placeholder:'今天过得怎么样？',
+      save:'保存', edit:'修改', saved:'已保存 ✓', past:'过去的记录', random:'🎲 随机查看',
+      empty:'还没有记录，今天写下第一句吧。', install:'💡 <b>添加到主屏幕</b>，像App一样一键打开。请在浏览器菜单里点击"添加到主屏幕"。',
+      celebrate:'连续记录！', randomEmpty:'还没有可以随机查看的记录。'},
+  es:{title:'Solo una línea por hoy', streakLabel:'Racha', unit:' días', placeholder:'¿Cómo estuvo tu día?',
+      save:'Guardar', edit:'Editar', saved:'Guardado ✓', past:'Registros anteriores', random:'🎲 Ver aleatorio',
+      empty:'Aún no hay registros. Escribe tu primera línea hoy.', install:'💡 <b>Añade a la pantalla de inicio</b> para abrirlo como una app con un toque. Prueba "Añadir a pantalla de inicio" en el menú del navegador.',
+      celebrate:'¡días de racha!', randomEmpty:'Aún no hay registros para mostrar.'}
+};
+
+let lang = localStorage.getItem(LANG_KEY) || 'ko';
+const todayStr = () => new Date().toISOString().slice(0,10);
+const fmt = (s) => {
+  const d = new Date(s+'T00:00:00');
+  return d.toLocaleDateString(LOCALES[lang], {year:'numeric', month:'long', day:'numeric', weekday:'short'});
+};
+
+function load(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch(e){ return {}; } }
+function save(data){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(data)); return true; } catch(e){ console.error('save failed', e); return false; } }
+let entries = load();
+
+function computeStreak(){
+  let count = 0; let d = new Date();
+  if(!entries[todayStr()]) d.setDate(d.getDate()-1);
+  while(true){
+    const key = d.toISOString().slice(0,10);
+    if(entries[key]){ count++; d.setDate(d.getDate()-1); } else break;
+  }
+  return count;
+}
+
+function escapeHtml(str){ const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+function renderStreak(){ document.getElementById('streakNum').textContent = computeStreak() + T[lang].unit; }
+
+function renderEntries(){
+  const list = document.getElementById('entriesList');
+  const keys = Object.keys(entries).sort().reverse().filter(k => k !== todayStr());
+  if(keys.length === 0){ list.innerHTML = `<div class="empty">${T[lang].empty}</div>`; return; }
+  list.innerHTML = keys.slice(0,30).map(k =>
+    `<div class="entry"><div class="d">${fmt(k)}</div><div class="t">${escapeHtml(entries[k])}</div></div>`
+  ).join('');
+}
+
+function applyLang(){
+  document.getElementById('htmlRoot').lang = lang;
+  document.body.dataset.lang = lang;
+  const t = T[lang];
+  document.getElementById('titleText').textContent = t.title;
+  document.getElementById('streakLabel').textContent = t.streakLabel;
+  document.getElementById('entryInput').placeholder = t.placeholder;
+  document.getElementById('savedTag').textContent = t.saved;
+  document.getElementById('pastLabel').textContent = t.past;
+  document.getElementById('randomBtn').textContent = t.random;
+  document.getElementById('installTip').innerHTML = t.install;
+  document.getElementById('celebrateLabel').textContent = t.celebrate;
+  document.getElementById('saveBtn').textContent = entries[todayStr()] ? t.edit : t.save;
+  document.querySelectorAll('.langbtn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  document.getElementById('todayLabel').textContent = fmt(todayStr());
+  renderStreak();
+  renderEntries();
+}
+
+function celebrateStreak(n){
+  const overlay = document.getElementById('celebrate');
+  document.getElementById('celebrateNum').textContent = n;
+  overlay.classList.add('show');
+  setTimeout(() => overlay.classList.remove('show'), 1400);
+}
+
+function init(){
+  const input = document.getElementById('entryInput');
+  const saveBtn = document.getElementById('saveBtn');
+  const charCount = document.getElementById('charCount');
+  const savedTag = document.getElementById('savedTag');
+
+  if(entries[todayStr()]) input.value = entries[todayStr()];
+  charCount.textContent = input.value.length;
+  saveBtn.disabled = input.value.trim().length === 0;
+
+  input.addEventListener('input', () => {
+    charCount.textContent = input.value.length;
+    saveBtn.disabled = input.value.trim().length === 0;
+    savedTag.classList.remove('show');
+  });
+
+  saveBtn.addEventListener('click', () => {
+    const val = input.value.trim();
+    if(!val) return;
+    const wasNewDay = !entries[todayStr()];
+    entries[todayStr()] = val;
+    const ok = save(entries);
+    savedTag.classList.toggle('show', ok);
+    saveBtn.textContent = T[lang].edit;
+    renderStreak();
+    renderEntries();
+    if(!ok){ alert('Save failed'); return; }
+    if(wasNewDay) celebrateStreak(computeStreak());
+  });
+
+  document.getElementById('randomBtn').addEventListener('click', () => {
+    const keys = Object.keys(entries);
+    const view = document.getElementById('randomView');
+    if(keys.length === 0){ view.classList.add('show'); view.innerHTML = `<div class="t">${T[lang].randomEmpty}</div>`; return; }
+    const k = keys[Math.floor(Math.random()*keys.length)];
+    view.classList.add('show');
+    view.innerHTML = `<div class="d">${fmt(k)}</div><div class="t">${escapeHtml(entries[k])}</div>`;
+  });
+
+  document.querySelectorAll('.langbtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      lang = btn.dataset.lang;
+      localStorage.setItem(LANG_KEY, lang);
+      applyLang();
+    });
+  });
+
+  applyLang();
+
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if(!isStandalone){ document.getElementById('installTip').classList.add('show'); }
+}
+init();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+</script>
+</body>
+</html>
